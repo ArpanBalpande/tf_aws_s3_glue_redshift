@@ -1,0 +1,24 @@
+image:
+  name: hashicorp/terraform:0.12.13
+  entrypoint:
+    - '/usr/bin/env'
+
+stages:
+  - check
+  - deploy
+
+variables:
+  STATE_BUCKET: buckettostorestate
+  STATE_REGION: us-east-2
+
+plan_dev:
+  stage: check
+  variables:
+    STATE_OBJECT: nameoftfstatefile.tfstate
+    TERRAFORM_VARFILE: terraform.tfvars
+  script:
+    - terraform init
+        -backend-config="bucket=${STATE_BUCKET}"
+        -backend-config="key=${STATE_OBJECT}"
+        -backend-config="region=${STATE_REGION}"
+    - terraform plan -var-file="${TERRAFORM_VARFILE}" --debug
